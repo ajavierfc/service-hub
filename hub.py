@@ -3,121 +3,25 @@ import time
 import errno
 import traceback
 from _thread import *
-
-
-class Socket(object):
-
-    def __init__(self, host, port):
-        self._host = host
-        self._port = port
-        self._connected = False
-
-    def reconnect(self):
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            self._connected = False
-            self._socket.settimeout(2)
-            self._socket.connect((self._host, self._port))
-            self._socket.settimeout(1)
-            self._connected = True
-            print("Connected to {}:{}".format(self._host, self._port))
-        except socket.timeout:
-            print("Timeout connecting to " + self._host)
-        except:
-            traceback.print_exc()
-
-    def send(self, data):
-        if self._connected:
-            self._socket.send(data)
-            print("SENT TO {}:{} >{}<".format(self._host, self._port, data))
-
-    def recv(self, bufsize, data):
-        if not self._connected:
-            return
-        try:
-            return self._socket.recv(bufsize)
-        except socket.timeout:
-            print("Timeout receiving {}:{} >{}<".format(self._host, self._port, data))
-
-    def close(self):
-        self._connected = False
-        self._socket.close()
-
-    def is_connected(self):
-        return self._connected
-
-
-client_sockets = [
-    Socket('localhost', 1883),
-    Socket('localhost', 18831),
-    Socket('localhost', 18832),
-]
-
-
-def send(client_socket, data):
-    if not client_socket.is_connected():
-        client_socket.reconnect()
-
-    while True:
-        try:
-            client_socket.send(data)
-            server_data = client_socket.recv(1024, data)
-            break
-
-        except socket.timeout:
-            print("SERVER: timeout")
-            return ""
-
-        except socket.error as error:
-            if error.errno == errno.EPIPE:
-                print("Connection lost. Reconnecting")
-                client_socket.reconnect()
-            elif error.errno == errno.ECONNRESET:
-                print("Connection closed.")
-                return ""
-            else:
-                raise
-
-    #client_socket.close()
-
-    print("SERVER: >" + str(server_data) +"<")
-
-    return server_data
-
-
-def send_to_servers(data):
-    global client_sockets
-
-    server_data = None
-
-    for client_socket in client_sockets:
-        got = send(client_socket, data)
-        if got:
-            server_data = got
-
-    return server_data
-
-
-def connect_to_servers():
-    global client_sockets
-    for client_socket in client_sockets:
-        client_socket.reconnect()
+from server_access import Sockets
 
 
 def client_thread(connected_client):
+    sockets = Sockets()
+
     connected_client.settimeout(1)
-    connect_to_servers()
+
     while True:
         try:
             data = connected_client.recv(1024)
-            print("CLIENT: >" + str(data) +"<")
+            print("Data from connected client >" + str(data) +"<")
         except socket.timeout:
-            print("CLIENT: timeout")
+            print("Coudn't get data from connected client: timeout")
             break
 
         if data:
-            data = send_to_servers(data)
-            if data is not None:
+            data = sockets.send(data)
+            if data:
                 connected_client.send(data)
         else:
             break
