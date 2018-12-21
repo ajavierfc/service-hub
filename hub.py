@@ -14,10 +14,11 @@ class Socket(object):
 
     def reconnect(self):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.settimeout(5)
         try:
             self._connected = False
+            self._socket.settimeout(2)
             self._socket.connect((self._host, self._port))
+            self._socket.settimeout(1)
             self._connected = True
             print("Connected to {}:{}".format(self._host, self._port))
         except socket.timeout:
