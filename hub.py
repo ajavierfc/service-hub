@@ -2,10 +2,7 @@ import socket
 import time
 import errno
 import traceback
-try:
-    from thread import *
-except:
-    from _thread import *
+from _thread import *
 
 
 class Socket(object):
@@ -40,7 +37,6 @@ class Socket(object):
             return self._socket.recv(bufsize)
         except socket.timeout:
             print("Timeout receiving {}:{} >{}<".format(self._host, self._port, data))
-            send_to_servers(data)
 
     def close(self):
         self._connected = False
@@ -53,6 +49,7 @@ class Socket(object):
 client_sockets = [
     Socket('localhost', 1883),
     Socket('localhost', 18831),
+    Socket('localhost', 18832),
 ]
 
 
