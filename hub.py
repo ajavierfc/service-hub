@@ -32,7 +32,7 @@ def client_thread(connected_client):
 if __name__ == '__main__':
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('', 8888))
+    server_socket.bind(('localhost', 8888))
     server_socket.listen(100)
 
     print("Server listening")
@@ -41,7 +41,8 @@ if __name__ == '__main__':
         while 1:
             conn, addr = server_socket.accept()
             start_new_thread(client_thread, (conn,))
-    except KeyboardInterrupt:
+    except:
+        traceback.print_exc()
         server_socket.close()
         client_socket.close()
         raise
