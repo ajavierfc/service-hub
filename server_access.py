@@ -8,6 +8,7 @@ class Socket(object):
         self._host = host
         self._port = port
         self._connected = False
+        self._socket = None
 
     def reconnect(self):
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -56,7 +57,8 @@ class Socket(object):
 
     def close(self):
         self._connected = False
-        self._socket.close()
+        if self._socket:
+            self._socket.close()
 
     def is_connected(self):
         return self._connected
@@ -70,6 +72,13 @@ class Sockets(object):
             Socket('localhost', 18831),
             Socket('localhost', 18832),
         ]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        for s in self._client_sockets:
+            s.close()
 
     def send(self, data):
         response = None
