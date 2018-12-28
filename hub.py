@@ -7,24 +7,22 @@ from server_access import Sockets
 
 
 def client_thread(connected_client):
-    connected_client.settimeout(1)
+    connected_client.settimeout(60)
 
     try:
         with Sockets() as sockets:
             while True:
                 try:
-                    data = connected_client.recv(1024)
+                    data = connected_client.recv(1048576)
+                    if not data: break
                     print("Data from connected client >" + str(data) +"<")
                 except socket.timeout:
                     print("Coudn't get data from connected client: timeout")
                     break
 
+                data = sockets.send(data)
                 if data:
-                    data = sockets.send(data)
-                    if data:
-                        connected_client.send(data)
-                else:
-                    break
+                    connected_client.send(data)
     finally:
         connected_client.close()
 
@@ -44,5 +42,4 @@ if __name__ == '__main__':
     except:
         traceback.print_exc()
         server_socket.close()
-        client_socket.close()
         raise

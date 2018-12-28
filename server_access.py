@@ -29,18 +29,18 @@ class Socket(object):
 
         while self._connected:
             try:
-                self._socket.send(data)
-                print("Sent to {}:{} >{}<".format(self._host, self._port, data))
+                self._socket.sendall(data)
+                print("Sent to {}:{} {} bytes".format(self._host, self._port, len(data)))
 
                 while True:
-                    response_data += self._socket.recv(1024)
+                    response_data += self._socket.recv(1048576)
                     if not response_data: break
 
                 return response_data
 
             except socket.timeout:
                 if response_data: return response_data
-                print("Timeout sending to {}:{} >{}<".format(self._host, self._port, data))
+                print("Timeout sending to {}:{} {} bytes".format(self._host, self._port, len(data)))
                 return
 
             except socket.error as error:
@@ -89,7 +89,7 @@ class Sockets(object):
 
             if client_socket.is_connected():
                 server_data = client_socket.send(data)
-                print("Server data: >{}<".format(str(data)))
+                print("Server data: {} bytes".format(len(data)))
 
                 if not response and server_data:
                     response = server_data
