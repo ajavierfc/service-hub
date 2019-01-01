@@ -11,9 +11,13 @@ class Socket(object):
         self._socket = None
 
     def reconnect(self):
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if self._connected:
+            self.close()
+
+        if not self._socket:
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         try:
-            self._connected = False
             self._socket.settimeout(2)
             self._socket.connect((self._host, self._port))
             self._socket.settimeout(0.2)
@@ -29,12 +33,17 @@ class Socket(object):
 
         while self._connected:
             try:
-                self._socket.sendall(data)
+                sent = self._socket.sendall(data)
                 print("Sent to {}:{} {} bytes".format(self._host, self._port, len(data)))
 
+                if sent:
+                    print("Send failed")
+                    return
+
                 while True:
-                    response_data += self._socket.recv(1048576)
-                    if not response_data: break
+                    chunk = self._socket.recv(1048576)
+                    if not chunk: break
+                    response_data += chunk
 
                 return response_data
 
@@ -46,10 +55,11 @@ class Socket(object):
             except socket.error as error:
                 if error.errno == errno.EPIPE:
                     print("Connection lost. Reconnecting")
-                    client_socket.reconnect()
+                    self.reconnect()
 
                 elif error.errno == errno.ECONNRESET:
                     print("Connection closed.")
+                    self._connected = False
                     return
 
                 else:
@@ -59,6 +69,7 @@ class Socket(object):
         self._connected = False
         if self._socket:
             self._socket.close()
+            del self._socket
 
     def is_connected(self):
         return self._connected
@@ -79,6 +90,7 @@ class Sockets(object):
     def __exit__(self, *args):
         for s in self._client_sockets:
             s.close()
+        self._client_sockets = []
 
     def send(self, data):
         response = None

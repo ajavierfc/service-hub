@@ -7,7 +7,7 @@ from server_access import Sockets
 
 
 def client_thread(connected_client):
-    connected_client.settimeout(60)
+    connected_client.settimeout(5)
 
     try:
         with Sockets() as sockets:
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(('localhost', 8888))
-    server_socket.listen(100)
+    server_socket.listen(5)
 
     print("Server listening")
 
