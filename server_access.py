@@ -78,10 +78,9 @@ class Socket(object):
 class Sockets(object):
 
     def __init__(self):
+        servers = open('server.lst', 'r').readlines()
         self._client_sockets = [
-            Socket('localhost', 1883),
-            Socket('localhost', 18831),
-            Socket('localhost', 18832),
+            Socket(s.split()[0], int(s.split()[1].strip())) for s in servers
         ]
 
     def __enter__(self):
