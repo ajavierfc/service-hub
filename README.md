@@ -1,7 +1,7 @@
 
 
 # service-hub
-This service will listen on a specific local port and redirect the incoming raw traffic to the host and ports listed on a file (peer.lst). Doesn't handle peer's response.
+This simple service will listen on a specific local port and redirect the incoming raw traffic to the host and ports listed on a file (peer.lst). Doesn't handle peer's response.
 
 ### peer.lst
 
