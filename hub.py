@@ -29,11 +29,13 @@ def client_thread(connected_client):
 
 if __name__ == '__main__':
 
+    listen = ('localhost', 8888)
+
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('localhost', 8888))
+    server_socket.bind(listen)
     server_socket.listen(5)
 
-    print("Server listening")
+    print("Server listening on " + str(listen))
 
     try:
         while 1:
