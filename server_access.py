@@ -6,7 +6,7 @@ class Socket(object):
 
     def __init__(self, host, port):
         self._host = host
-        self._port = port
+        self._port = int(port)
         self._connected = False
         self._socket = None
 
@@ -80,7 +80,7 @@ class Sockets(object):
     def __init__(self):
         servers = open('peer.lst', 'r').readlines()
         self._client_sockets = [
-            Socket(s.split()[0], int(s.split()[1].strip())) for s in servers
+            Socket(*tuple(s.split())) for s in servers
         ]
 
     def __enter__(self):
